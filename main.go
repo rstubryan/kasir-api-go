@@ -6,13 +6,33 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	_ "kasir-api/docs"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// @title Kasir API
+// @version 1.0
+// @description API Sederhana untuk aplikasi kasir dengan CRUD Products dan Categories
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
+// @schemes http https
+
 type Product struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Price string `json:"price"`
-	Stock int    `json:"stock"`
+	ID    int    `json:"id" example:"1"`
+	Name  string `json:"name" example:"Kopi Susu"`
+	Price string `json:"price" example:"15000"`
+	Stock int    `json:"stock" example:"50"`
 }
 
 var products = []Product{
@@ -31,9 +51,9 @@ var products = []Product{
 }
 
 type Category struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          int    `json:"id" example:"1"`
+	Name        string `json:"name" example:"Makanan"`
+	Description string `json:"description" example:"Berbagai jenis makanan"`
 }
 
 var categories = []Category{
@@ -48,6 +68,125 @@ var categories = []Category{
 		Description: "Berbagai jenis minuman",
 	},
 }
+
+// Health godoc
+// @Summary Health check
+// @Description Check if the server is running
+// @Tags health
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /health [get]
+
+// GetAllProducts godoc
+// @Summary Get all products
+// @Description Get list of all products
+// @Tags products
+// @Accept json
+// @Produce json
+// @Success 200 {array} Product
+// @Router /api/v1/products [get]
+
+// CreateProduct godoc
+// @Summary Create a new product
+// @Description Create a new product
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param product body Product true "Product object"
+// @Success 201 {object} Product
+// @Failure 400 {string} string "Bad Request"
+// @Router /api/v1/products [post]
+
+// GetProductByID godoc
+// @Summary Get a product by ID
+// @Description Get a single product by ID
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 200 {object} Product
+// @Failure 404 {string} string "Product not found"
+// @Router /api/v1/products/{id} [get]
+
+// UpdateProduct godoc
+// @Summary Update a product
+// @Description Update an existing product
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Param product body Product true "Product object"
+// @Success 200 {object} Product
+// @Failure 400 {string} string "Bad Request"
+// @Failure 404 {string} string "Product not found"
+// @Router /api/v1/products/{id} [put]
+
+// DeleteProduct godoc
+// @Summary Delete a product
+// @Description Delete a product by ID
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 204
+// @Failure 404 {string} string "Product not found"
+// @Router /api/v1/products/{id} [delete]
+
+// GetAllCategories godoc
+// @Summary Get all categories
+// @Description Get list of all categories
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Success 200 {array} Category
+// @Router /api/v1/categories [get]
+
+// CreateCategory godoc
+// @Summary Create a new category
+// @Description Create a new category
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param category body Category true "Category object"
+// @Success 201 {object} Category
+// @Failure 400 {string} string "Bad Request"
+// @Router /api/v1/categories [post]
+
+// GetCategoryByID godoc
+// @Summary Get a category by ID
+// @Description Get a single category by ID
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param id path int true "Category ID"
+// @Success 200 {object} Category
+// @Failure 404 {string} string "Category not found"
+// @Router /api/v1/categories/{id} [get]
+
+// UpdateCategory godoc
+// @Summary Update a category
+// @Description Update an existing category
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param id path int true "Category ID"
+// @Param category body Category true "Category object"
+// @Success 200 {object} Category
+// @Failure 400 {string} string "Bad Request"
+// @Failure 404 {string} string "Category not found"
+// @Router /api/v1/categories/{id} [put]
+
+// DeleteCategory godoc
+// @Summary Delete a category
+// @Description Delete a category by ID
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param id path int true "Category ID"
+// @Success 204
+// @Failure 404 {string} string "Category not found"
+// @Router /api/v1/categories/{id} [delete]
 
 func getAllProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -299,7 +438,10 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{"status": "OK", "message": "Service is healthy"})
 	})
 
+	http.HandleFunc("/swagger/", httpSwagger.WrapHandler)
+
 	fmt.Println("Server is running on port 8080")
+	fmt.Println("Swagger UI available at: http://localhost:8080/swagger/index.html")
 
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {

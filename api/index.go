@@ -6,19 +6,39 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	_ "kasir-api/docs"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// @title Kasir API
+// @version 1.0
+// @description API Sederhana untuk aplikasi kasir dengan CRUD Products dan Categories
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
+// @schemes http https
+
 type Product struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Price string `json:"price"`
-	Stock int    `json:"stock"`
+	ID    int    `json:"id" example:"1"`
+	Name  string `json:"name" example:"Kopi Susu"`
+	Price string `json:"price" example:"15000"`
+	Stock int    `json:"stock" example:"50"`
 }
 
 type Category struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          int    `json:"id" example:"1"`
+	Name        string `json:"name" example:"Makanan"`
+	Description string `json:"description" example:"Berbagai jenis makanan"`
 }
 
 var (
@@ -60,13 +80,8 @@ func initData() {
 func initApp() {
 	initData()
 
-	http.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
-			"status":  "OK",
-			"message": "Service is healthy",
-		})
-	})
+	http.HandleFunc("GET /health", healthHandler)
+	http.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
 
 	http.HandleFunc("GET /api/v1/products", getAllProducts)
 	http.HandleFunc("POST /api/v1/products", createProduct)
@@ -81,11 +96,45 @@ func initApp() {
 	http.HandleFunc("DELETE /api/v1/categories/", deleteCategory)
 }
 
+// Health godoc
+// @Summary Health check
+// @Description Check if the server is running
+// @Tags health
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /health [get]
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status":  "OK",
+		"message": "Service is healthy",
+	})
+}
+
+// GetAllProducts godoc
+// @Summary Get all products
+// @Description Get list of all products
+// @Tags products
+// @Accept json
+// @Produce json
+// @Success 200 {array} Product
+// @Router /api/v1/products [get]
 func getAllProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(products)
 }
 
+// CreateProduct godoc
+// @Summary Create a new product
+// @Description Create a new product
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param product body Product true "Product object"
+// @Success 201 {object} Product
+// @Failure 400 {string} string "Bad Request"
+// @Router /api/v1/products [post]
 func createProduct(w http.ResponseWriter, r *http.Request) {
 	var newProduct Product
 	err := json.NewDecoder(r.Body).Decode(&newProduct)
@@ -100,6 +149,16 @@ func createProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(newProduct)
 }
 
+// GetProductByID godoc
+// @Summary Get a product by ID
+// @Description Get a single product by ID
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 200 {object} Product
+// @Failure 404 {string} string "Product not found"
+// @Router /api/v1/products/{id} [get]
 func getProductByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/products/")
 	id, err := strconv.Atoi(idStr)
@@ -118,6 +177,18 @@ func getProductByID(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Product not found", http.StatusNotFound)
 }
 
+// UpdateProduct godoc
+// @Summary Update a product
+// @Description Update an existing product
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Param product body Product true "Product object"
+// @Success 200 {object} Product
+// @Failure 400 {string} string "Bad Request"
+// @Failure 404 {string} string "Product not found"
+// @Router /api/v1/products/{id} [put]
 func updateProduct(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/products/")
 	id, err := strconv.Atoi(idStr)
@@ -151,6 +222,16 @@ func updateProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(products[index])
 }
 
+// DeleteProduct godoc
+// @Summary Delete a product
+// @Description Delete a product by ID
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 204
+// @Failure 404 {string} string "Product not found"
+// @Router /api/v1/products/{id} [delete]
 func deleteProduct(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/products/")
 	id, err := strconv.Atoi(idStr)
@@ -176,11 +257,29 @@ func deleteProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// GetAllCategories godoc
+// @Summary Get all categories
+// @Description Get list of all categories
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Success 200 {array} Category
+// @Router /api/v1/categories [get]
 func getAllCategories(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(categories)
 }
 
+// CreateCategory godoc
+// @Summary Create a new category
+// @Description Create a new category
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param category body Category true "Category object"
+// @Success 201 {object} Category
+// @Failure 400 {string} string "Bad Request"
+// @Router /api/v1/categories [post]
 func createCategory(w http.ResponseWriter, r *http.Request) {
 	var newCategory Category
 	err := json.NewDecoder(r.Body).Decode(&newCategory)
@@ -195,6 +294,16 @@ func createCategory(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(newCategory)
 }
 
+// GetCategoryByID godoc
+// @Summary Get a category by ID
+// @Description Get a single category by ID
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param id path int true "Category ID"
+// @Success 200 {object} Category
+// @Failure 404 {string} string "Category not found"
+// @Router /api/v1/categories/{id} [get]
 func getCategoryByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/categories/")
 	id, err := strconv.Atoi(idStr)
@@ -213,6 +322,18 @@ func getCategoryByID(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Category not found", http.StatusNotFound)
 }
 
+// UpdateCategory godoc
+// @Summary Update a category
+// @Description Update an existing category
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param id path int true "Category ID"
+// @Param category body Category true "Category object"
+// @Success 200 {object} Category
+// @Failure 400 {string} string "Bad Request"
+// @Failure 404 {string} string "Category not found"
+// @Router /api/v1/categories/{id} [put]
 func updateCategory(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/categories/")
 	id, err := strconv.Atoi(idStr)
@@ -246,6 +367,16 @@ func updateCategory(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(categories[index])
 }
 
+// DeleteCategory godoc
+// @Summary Delete a category
+// @Description Delete a category by ID
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param id path int true "Category ID"
+// @Success 204
+// @Failure 404 {string} string "Category not found"
+// @Router /api/v1/categories/{id} [delete]
 func deleteCategory(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/categories/")
 	id, err := strconv.Atoi(idStr)
@@ -271,6 +402,9 @@ func deleteCategory(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// Handler godoc
+// @Summary Main handler for Vercel
+// @Description This is the main entry point for Vercel serverless function
 func Handler(w http.ResponseWriter, r *http.Request) {
 	once.Do(initApp)
 	http.DefaultServeMux.ServeHTTP(w, r)
