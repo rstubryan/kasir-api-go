@@ -1,0 +1,24 @@
+meta {
+  name: CREATE Product
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/api/v1/products
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Teh Botol",
+    "price": "5000",
+    "stock": 20
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

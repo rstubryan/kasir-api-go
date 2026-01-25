@@ -1,0 +1,24 @@
+meta {
+  name: UPDATE Product
+  type: http
+  seq: 6
+}
+
+put {
+  url: http://localhost:8080/api/v1/products/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Kopi Susu Updated",
+    "price": "18000",
+    "stock": 45
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
