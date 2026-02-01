@@ -11,5 +11,9 @@
       "src": "/(.*)",
       "dest": "api/index.go"
     }
-  ]
+  ],
+  "env": {
+    "DATABASE_URL": "@postgres-url",
+    "POSTGRES_URL": "@postgres-url"
+  }
 }
