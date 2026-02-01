@@ -29,9 +29,25 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8080
 // @BasePath /
 // @schemes http https
+
+// CORS middleware
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
 
 // Health godoc
 // @Summary Health check
@@ -78,6 +94,9 @@ func main() {
 	// Create router
 	router := mux.NewRouter()
 
+	// Apply CORS middleware
+	router.Use(corsMiddleware)
+
 	// Register routes
 	productHandler.RegisterRoutes(router)
 	categoryHandler.RegisterRoutes(router)
@@ -85,8 +104,12 @@ func main() {
 	// Health check endpoint
 	router.HandleFunc("/health", healthHandler).Methods("GET")
 
-	// Swagger documentation with dynamic host
-	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	// Swagger documentation with dynamic host configuration
+	router.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
+		httpSwagger.URL("/swagger/doc.json"),
+		httpSwagger.DeepLinking(true),
+		httpSwagger.PersistAuthorization(true),
+	))
 
 	// Start server
 	fmt.Println("Server is running on port 8080")
