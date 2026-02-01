@@ -424,44 +424,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handler.Category": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "example": "Berbagai jenis makanan"
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Makanan"
-                }
-            }
-        },
-        "handler.Product": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Kopi Susu"
-                },
-                "price": {
-                    "type": "string",
-                    "example": "15000"
-                },
-                "stock": {
-                    "type": "integer",
-                    "example": 50
-                }
-            }
-        },
         "models.Category": {
             "type": "object",
             "properties": {

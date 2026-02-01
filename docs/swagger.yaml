@@ -1,32 +1,5 @@
 basePath: /
 definitions:
-  handler.Category:
-    properties:
-      description:
-        example: Berbagai jenis makanan
-        type: string
-      id:
-        example: 1
-        type: integer
-      name:
-        example: Makanan
-        type: string
-    type: object
-  handler.Product:
-    properties:
-      id:
-        example: 1
-        type: integer
-      name:
-        example: Kopi Susu
-        type: string
-      price:
-        example: "15000"
-        type: string
-      stock:
-        example: 50
-        type: integer
-    type: object
   models.Category:
     properties:
       created_at:

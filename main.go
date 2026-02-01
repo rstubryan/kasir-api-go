@@ -85,7 +85,7 @@ func main() {
 	// Health check endpoint
 	router.HandleFunc("/health", healthHandler).Methods("GET")
 
-	// Swagger documentation
+	// Swagger documentation with dynamic host
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	// Start server
