@@ -1,87 +1,47 @@
 package repository
 
 import (
+	"kasir-api/config"
 	"kasir-api/models"
-	"sync"
 )
 
 type ProductRepository interface {
 	GetAll() ([]models.Product, error)
 	GetByID(id int) (*models.Product, error)
-	Create(product models.Product) (*models.Product, error)
-	Update(id int, product models.Product) (*models.Product, error)
+	Create(product *models.Product) error
+	Update(id int, product *models.Product) error
 	Delete(id int) error
 }
 
-type productRepository struct {
-	products []models.Product
-	mu       sync.RWMutex
-	nextID   int
-}
+type productRepository struct{}
 
 func NewProductRepository() ProductRepository {
-	return &productRepository{
-		products: []models.Product{
-			{ID: 1, Name: "Kopi Susu", Price: "15000", Stock: 50},
-			{ID: 2, Name: "Nasi Goreng", Price: "25000", Stock: 30},
-		},
-		nextID: 3,
-	}
+	return &productRepository{}
 }
 
 func (r *productRepository) GetAll() ([]models.Product, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	return r.products, nil
+	var products []models.Product
+	err := config.DB.Find(&products).Error
+	return products, err
 }
 
 func (r *productRepository) GetByID(id int) (*models.Product, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	for _, product := range r.products {
-		if product.ID == id {
-			return &product, nil
-		}
+	var product models.Product
+	err := config.DB.First(&product, id).Error
+	if err != nil {
+		return nil, err
 	}
-	return nil, nil
-}
-
-func (r *productRepository) Create(product models.Product) (*models.Product, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	product.ID = r.nextID
-	r.nextID++
-
-	r.products = append(r.products, product)
 	return &product, nil
 }
 
-func (r *productRepository) Update(id int, product models.Product) (*models.Product, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (r *productRepository) Create(product *models.Product) error {
+	return config.DB.Create(product).Error
+}
 
-	for i, p := range r.products {
-		if p.ID == id {
-			product.ID = id
-			r.products[i] = product
-			return &r.products[i], nil
-		}
-	}
-	return nil, nil
+func (r *productRepository) Update(id int, product *models.Product) error {
+	return config.DB.Model(&models.Product{}).Where("id = ?", id).Updates(product).Error
 }
 
 func (r *productRepository) Delete(id int) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	for i, product := range r.products {
-		if product.ID == id {
-			r.products = append(r.products[:i], r.products[i+1:]...)
-			return nil
-		}
-	}
-	return nil
+	return config.DB.Delete(&models.Product{}, id).Error
 }

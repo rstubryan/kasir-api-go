@@ -3,9 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"kasir-api/config"
 	"kasir-api/handlers"
+	"kasir-api/migrations"
 	"kasir-api/repository"
 	"kasir-api/service"
+	"log"
 	"net/http"
 
 	_ "kasir-api/docs"
@@ -47,6 +50,19 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// Initialize database
+	err := config.InitDB()
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer config.CloseDB()
+
+	// Run migrations
+	migrations.RunMigrations()
+
+	// Seed initial data
+	migrations.SeedData()
+
 	// Initialize repositories
 	productRepo := repository.NewProductRepository()
 	categoryRepo := repository.NewCategoryRepository()
@@ -75,9 +91,10 @@ func main() {
 	// Start server
 	fmt.Println("Server is running on port 8080")
 	fmt.Println("Swagger UI available at: http://localhost:8080/swagger/index.html")
+	fmt.Println("Connected to NeonDB database")
 
-	err := http.ListenAndServe(":8080", router)
+	err = http.ListenAndServe(":8080", router)
 	if err != nil {
-		fmt.Println("Error starting server:", err)
+		log.Println("Error starting server:", err)
 	}
 }
