@@ -1,0 +1,26 @@
+meta {
+  name: Checkout
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{base_url}}/api/checkout
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "items": [
+      {
+        "product_id": 1,
+        "quantity": 2
+      },
+      {
+        "product_id": 2,
+        "quantity": 1
+      }
+    ]
+  }
+}

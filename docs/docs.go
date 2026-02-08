@@ -24,6 +24,138 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/checkout": {
+            "post": {
+                "description": "Create a new transaction with multiple items. This will validate stock, calculate total, and update product stock.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transactions"
+                ],
+                "summary": "Create a new transaction (Checkout)",
+                "parameters": [
+                    {
+                        "description": "Checkout request with items",
+                        "name": "checkout",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CheckoutRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Transaction"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or insufficient stock",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/report": {
+            "get": {
+                "description": "Get sales summary for a specific date range including total revenue, total transactions, and best seller product",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Get sales report by date range",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start Date (YYYY-MM-DD format)",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date (YYYY-MM-DD format)",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.DailyReport"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing required query parameters",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/report/hari-ini": {
+            "get": {
+                "description": "Get sales summary for today including total revenue, total transactions, and best seller product",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Get daily sales report",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.DailyReport"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/categories": {
             "get": {
                 "description": "Get list of all categories",
@@ -424,6 +556,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.BestSellerProduct": {
+            "type": "object",
+            "properties": {
+                "nama": {
+                    "type": "string"
+                },
+                "qty_terjual": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.Category": {
             "type": "object",
             "properties": {
@@ -444,6 +587,42 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "models.CheckoutItem": {
+            "type": "object",
+            "properties": {
+                "product_id": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.CheckoutRequest": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.CheckoutItem"
+                    }
+                }
+            }
+        },
+        "models.DailyReport": {
+            "type": "object",
+            "properties": {
+                "produk_terlaris": {
+                    "$ref": "#/definitions/models.BestSellerProduct"
+                },
+                "total_revenue": {
+                    "type": "integer"
+                },
+                "total_transaksi": {
+                    "type": "integer"
                 }
             }
         },
@@ -471,6 +650,49 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "models.Transaction": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TransactionDetail"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "total_amount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.TransactionDetail": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "integer"
+                },
+                "product_name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "subtotal": {
+                    "type": "integer"
+                },
+                "transaction_id": {
+                    "type": "integer"
                 }
             }
         }
