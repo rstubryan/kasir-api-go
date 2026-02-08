@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"strconv"
+	"time"
+)
 
 type Product struct {
 	ID        int       `json:"id" example:"1"`
@@ -9,4 +12,10 @@ type Product struct {
 	Stock     int       `json:"stock" example:"50"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// PriceInt converts Price string to int
+func (p *Product) PriceInt() int {
+	price, _ := strconv.Atoi(p.Price)
+	return price
 }

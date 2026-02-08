@@ -10,7 +10,7 @@ func RunMigrations() {
 	db := config.GetDB()
 
 	// Auto migrate tables
-	err := db.AutoMigrate(&models.Product{}, &models.Category{})
+	err := db.AutoMigrate(&models.Product{}, &models.Category{}, &models.Transaction{}, &models.TransactionDetail{})
 	if err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}

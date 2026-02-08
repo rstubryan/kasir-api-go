@@ -82,14 +82,17 @@ func main() {
 	// Initialize repositories
 	productRepo := repository.NewProductRepository()
 	categoryRepo := repository.NewCategoryRepository()
+	transactionRepo := repository.NewTransactionRepository()
 
 	// Initialize services
 	productService := service.NewProductService(productRepo)
 	categoryService := service.NewCategoryService(categoryRepo)
+	transactionService := service.NewTransactionService(transactionRepo)
 
 	// Initialize handlers
 	productHandler := handlers.NewProductHandler(productService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
+	transactionHandler := handlers.NewTransactionHandler(transactionService)
 
 	// Create router
 	router := mux.NewRouter()
@@ -100,6 +103,7 @@ func main() {
 	// Register routes
 	productHandler.RegisterRoutes(router)
 	categoryHandler.RegisterRoutes(router)
+	transactionHandler.RegisterRoutes(router)
 
 	// Health check endpoint
 	router.HandleFunc("/health", healthHandler).Methods("GET")
